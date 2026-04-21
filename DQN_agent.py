@@ -49,27 +49,27 @@ class ReplayBuffer:
     
     def add(self, state, action, reward, next_state, done):
         # Add later
-        """_summary_
+        """Stores transition in replay buffer.
 
         Args:
-            state (_type_): _description_
-            action (_type_): _description_
-            reward (_type_): _description_
-            next_state (_type_): _description_
-            done (function): _description_
+            state (np.darray): Current State.
+            action (int): Action agent can do.
+            reward (float): Given reward.
+            next_state (np.darray): Result after action/
+            done (bool): If episode ended after transition.
         """
         experience = (state, action, reward, next_state, done)
         self.buffer.append(experience)
     
     def sample(self, batch_size):
         # Add later
-        """_summary_
+        """Randomly samples a batch from the buffer.
 
         Args:
-            batch_size (_type_): _description_
+            batch_size (int): Number of transitions to sample.
 
         Returns:
-            _type_: _description_
+            Tuple: Containing states, actions, rewards, next states, and dones. as Torch Tensors.
         """
         batch = random.sample(self.buffer, batch_size)
         states, actions, rewards, next_states, dones = zip(*batch)
@@ -109,7 +109,11 @@ class DQNAgent:
         return q.argmax().item()
     
     def update(self):
-        """_summary_
+        """
+        Samples batch from memory and performs one step of gradient descent.
+        
+        Computes loss between current Q-values and the expected Q-values 
+        then updates main network weights to minimize loss.
         """
         if len(self.buffer) < BATCH_SIZE:
             return
