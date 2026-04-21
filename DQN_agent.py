@@ -12,8 +12,11 @@ ENV_NAME = "LunarLander-v3"
 HIDDEN_SIZE = 64
 BUFFER_SIZE = 10000
 EPSILON_START = 1.0
+EPSILON_MIN = 0.01
+EPSILON_DECAY = 0.995
 LR = 0.001              # Learning Rate
 BATCH_SIZE = 64
+GAMMA = 0.99
 
 class QNetwork(nn.Module):
     def __init__(self, state_dim, action_dim, hidden):
@@ -87,7 +90,7 @@ class DQNAgent:
         self.target.eval()
         
         self.optimizer = optim.Adam(self.q_net.parameters(), lr=LR)
-        self.loss = nn.MSELoss()
+        self.loss_fn = nn.MSELoss()
      
      # Epsilon Greedy for actions.   
     def select_action (self, state):
@@ -101,7 +104,27 @@ class DQNAgent:
         if len(self.buffer) < BATCH_SIZE:
             return
         states, actions, rewards, next_states, dones = self.buffer.sample(BATCH_SIZE)
-    pass
+        
+        # Current Q Values
+        q_values = self.q_net(states).gather(1, actions.unsqueeze(1).squeeze(1))
+        
+        # Target Q values (Bellman)
+        with torch.no_grad():
+            max_next_q = self.target_net(next_states).max(1)[0]
+            targets = rewards + GAMMA * max_next_q * (1-dones)
+        
+        loss = self.loss_fn(q_values, targets)
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+        
+    # Shrinks the epsilon while ensuring it doesn't go below 0.01 so that the agent can keep exploriong.
+    def decay_epsilon(self):
+        self.epsilon = max(EPSILON_MIN, self.epsilon * EPSILON_DECAY)
+        
+    # Ensures stability by creating 2 networks.    
+    def sync_target(self):
+        self.target_net.load_state_dict(self.q_net.state_dict())
     
 def train():
     pass
