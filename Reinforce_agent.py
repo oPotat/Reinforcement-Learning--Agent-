@@ -83,6 +83,10 @@ print("Saved reinforce_rewards.npy")
 
 plt.figure(figsize=(10, 6))
 plt.plot(reward_history, color='blue', alpha=0.8)
+# Test later.
+window = 20
+smoothed = np.convolve(reward_history, np.ones(window)/window, mode='valid')
+plt.plot(range(window - 1, len(reward_history)), smoothed, label=f"{window}-ep average")
 plt.title('REINFORCE Learning Curve on CartPole-v1')
 plt.xlabel('Episode')
 plt.ylabel('Total Reward')
