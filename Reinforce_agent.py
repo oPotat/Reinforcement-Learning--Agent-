@@ -5,6 +5,7 @@ import torch.nn as nn
 import torch.optim as optim
 import matplotlib.pyplot as plt
 
+# Might be subject to change.
 env = gym.make("CartPole-v1", render_mode="rgb_array")
 n_states = env.observation_space.shape[0]
 n_actions = env.action_space.n
@@ -68,13 +69,13 @@ def reinforce(env, episodes=1000, gamma=0.99, lr=0.001):
     return policy_net, reward_history
 
 # Run the training and capture the history
-# reinforce_agent, reward_history = reinforce(env, episodes=500)
+reinforce_agent, reward_history = reinforce(env, episodes=500)
 
 
-# plt.figure(figsize=(10, 6))
-# plt.plot(reward_history, color='blue', alpha=0.8)
-# plt.title('REINFORCE Learning Curve on CartPole-v1')
-# plt.xlabel('Episode')
-# plt.ylabel('Total Reward')
-# plt.grid(True)
-# plt.show()
+plt.figure(figsize=(10, 6))
+plt.plot(reward_history, color='blue', alpha=0.8)
+plt.title('REINFORCE Learning Curve on CartPole-v1')
+plt.xlabel('Episode')
+plt.ylabel('Total Reward')
+plt.grid(True)
+plt.show()
