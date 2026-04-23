@@ -1,1 +1,4 @@
 .vscode/settings.json
+compare.py
+__pycache__/DQN_agent.cpython-310.pyc
+__pycache__/Reinforce_agent.cpython-310.pyc
