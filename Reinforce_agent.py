@@ -3,20 +3,13 @@ import gymnasium as gym
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import matplotlib.pyplot as plt
 
 # Hyperparameters
 ENV_NAME = "LunarLander-v3"
-EPISODES = 1000
-GAMMA = 0.99
-LR = 0.001
-EPISODES = 500
+EPISODES = 1500
+GAMMA    = 0.99
+LR       = 0.001
 
-# CHANGED TO LUNARLANDER 
-env = gym.make(ENV_NAME, render_mode="rgb_array")
-n_states = env.observation_space.shape[0]
-n_actions = env.action_space.n
-print(f'Number of states: {n_states}, Number of actions: {n_actions}')
 
 class PolicyNetwork(nn.Module):
     def __init__(self, n_states, n_actions):
@@ -30,25 +23,28 @@ class PolicyNetwork(nn.Module):
 
 
 def reinforce(env, episodes=EPISODES, gamma=GAMMA, lr=LR):
+    n_states  = env.observation_space.shape[0]
+    n_actions = env.action_space.n
+
     policy_net = PolicyNetwork(n_states, n_actions)
-    optimizer = optim.Adam(policy_net.parameters(), lr=lr)
-    
-    
-    reward_history = [] 
+    optimizer  = optim.Adam(policy_net.parameters(), lr=lr)
+    reward_history = []
 
     for episode in range(episodes):
         log_probs = []
-        rewards = []
-        state = env.reset()[0]
-        done = False
+        rewards   = []
+        state, _  = env.reset()
+        done      = False
 
         while not done:
-            state = torch.FloatTensor(state)
-            action_probs = policy_net(state)
-            action = torch.multinomial(action_probs, 1).item()
-            log_prob = torch.log(action_probs[action])
+            state_t      = torch.FloatTensor(state)
+            action_probs = policy_net(state_t)
+            action       = torch.multinomial(action_probs, 1).item()
+            log_prob     = torch.log(action_probs[action])
             log_probs.append(log_prob)
-            next_state, reward, done, _, _ = env.step(action)
+
+            next_state, reward, terminated, truncated, _ = env.step(action)
+            done = terminated or truncated
             rewards.append(reward)
             state = next_state
 
@@ -58,38 +54,30 @@ def reinforce(env, episodes=EPISODES, gamma=GAMMA, lr=LR):
             G = r + gamma * G
             returns.insert(0, G)
 
-        returns = torch.tensor(returns)
-        loss = -sum(log_probs[i] * returns[i] for i in range(len(returns)))
+        returns = torch.tensor(returns, dtype=torch.float32)
+        returns = (returns - returns.mean()) / (returns.std() + 1e-8)
 
+        loss = -sum(log_probs[i] * returns[i] for i in range(len(returns)))
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        
-        
-        total_reward = sum(rewards)
-        reward_history.append(total_reward)
 
-        if episode % 100 == 0: # Might tweak it to take average.
-            print(f'Episode {episode}: Total Reward: {total_reward}')
+        reward_history.append(sum(rewards))
 
-    
-    return policy_net, reward_history
+        if episode % 100 == 0:
+            print(f"[REINFORCE] Episode {episode}: Total Reward = {sum(rewards):.2f}")
 
-# Run the training and capture the history
-reinforce_agent, reward_history = reinforce(env, episodes=EPISODES)
+    return reward_history  
 
-np.save("reinforce_rewards.npy", np.array(reward_history)) # I think? Not sure.
-print("Saved reinforce_rewards.npy")
 
-plt.figure(figsize=(10, 6))
-plt.plot(reward_history, color='blue', alpha=0.8)
-# Test later.
-window = 20
-smoothed = np.convolve(reward_history, np.ones(window)/window, mode='valid')
-plt.plot(range(window - 1, len(reward_history)), smoothed, label=f"{window}-ep average")
-plt.title('REINFORCE Learning Curve on CartPole-v1')
-plt.xlabel('Episode')
-plt.ylabel('Total Reward')
-plt.grid(True)
-plt.savefig("reinforce_rewards.png")
-plt.show()
+def train():               
+    env = gym.make(ENV_NAME)
+    rewards = reinforce(env)
+    env.close()
+    np.save("reinforce_rewards.npy", np.array(rewards))
+    print("Saved reinforce_rewards.npy")
+    return rewards
+
+
+if __name__ == "__main__":
+    train()

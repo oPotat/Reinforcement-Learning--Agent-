@@ -5,11 +5,18 @@ import torch.nn as nn
 import torch.optim as optim
 import matplotlib.pyplot as plt
 
+# Hyperparameters
+HIDDEN_SIZE = 128
+EPISODES = 1500
+GAMMA = 0.99
+LR = 0.001
+ENV_NAME ="LunarLander-v3"
+
 class Actor(nn.Module):
-    def __init__(self, n_states, n_actions):
+    def __init__(self, n_states, n_actions, hidden = HIDDEN_SIZE):
         super(Actor, self).__init__()
-        self.fc1 = nn.Linear(n_states, 128)
-        self.fc2 = nn.Linear(128, n_actions)
+        self.fc1 = nn.Linear(n_states, hidden)
+        self.fc2 = nn.Linear(hidden, n_actions)
 
     def forward(self, x):
         x = torch.relu(self.fc1(x))
@@ -18,16 +25,16 @@ class Actor(nn.Module):
 
 # Critic network
 class Critic(nn.Module):
-    def __init__(self, n_states):
+    def __init__(self, n_states, hidden=HIDDEN_SIZE):
         super(Critic, self).__init__()
-        self.fc1 = nn.Linear(n_states, 128)
-        self.fc2 = nn.Linear(128, 1)
+        self.fc1 = nn.Linear(n_states, hidden)
+        self.fc2 = nn.Linear(hidden, 1)
 
     def forward(self, x):
         x = torch.relu(self.fc1(x))
         return self.fc2(x)
     
-def actor_critic(env, episodes=1000, gamma=0.99, lr=0.01):
+def actor_critic(env, episodes=EPISODES, gamma=GAMMA, lr=LR):
     n_states = env.observation_space.shape[0]
     n_actions = env.action_space.n
 
@@ -91,10 +98,10 @@ def actor_critic(env, episodes=1000, gamma=0.99, lr=0.01):
 
     return rewards_history  
 
-#
+
 def train():
-    env = gym.make("LunarLander-v3")
-    rewards = actor_critic(env, episodes=1000, gamma=0.99, lr=0.01)
+    env = gym.make(ENV_NAME)
+    rewards = actor_critic(env, episodes=EPISODES, gamma=GAMMA, lr=LR)
     env.close()
 
     np.save("a2c_rewards.npy", np.array(rewards))
