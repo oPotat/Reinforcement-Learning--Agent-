@@ -18,6 +18,6 @@ def smooth(rewards, window=WINDOW_SIZE):
 
 if __name__ == "__main__":
     from DQN_agent import train as train_dqn
-    from Reinforce_agent import reinforce as train_reinforce
+    from Reinforce_agent import reinforce as train_reinforce # honestly, not sure if this is the right import or not.
     from A2C_agent import empty
     
