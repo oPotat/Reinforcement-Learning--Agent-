@@ -21,7 +21,7 @@ GAMMA = 0.99            # Discount Factor
 SEED = 42
 EPISODES = 600
 TARGET_UPDATE_C = 10    # hard-update target net every C episodes
-MAX_STEPS       = 1000
+MAX_STEPS = 1000
 
 
 class QNetwork(nn.Module):
@@ -182,21 +182,6 @@ def train():
     # Save rewards for comparison
     np.save("dqn_rewards.npy", np.array(rewards_history))
     print("Saved dqn_rewards.npy")
- 
-    
-    plt.figure(figsize=(10, 4))
-    plt.plot(rewards_history, alpha=0.4, label="Episode reward")
-    window = 20
-    smoothed = np.convolve(rewards_history, np.ones(window)/window, mode='valid')
-    plt.plot(range(window - 1, len(rewards_history)), smoothed, label=f"{window}-ep average")
-    plt.xlabel("Episode")
-    plt.ylabel("Cumulative reward")
-    plt.title("DQN — LunarLander-v3")
-    plt.legend()
-    plt.tight_layout()
-    plt.savefig("dqn_rewards.png", dpi=150)
-    plt.show()
-    print("Saved dqn_rewards.png")
  
     return rewards_history
 
