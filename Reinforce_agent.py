@@ -6,13 +6,13 @@ import torch.optim as optim
 import matplotlib.pyplot as plt
 
 # Hyperparameters
-ENV_NAME = "CartPole-v1"
+ENV_NAME = "LunarLander-v3"
 EPISODES = 1000
 GAMMA = 0.99
 LR = 0.001
 EPISODES = 500
 
-# Might be subject to change.
+# CHANGED TO LUNARLANDER 
 env = gym.make(ENV_NAME, render_mode="rgb_array")
 n_states = env.observation_space.shape[0]
 n_actions = env.action_space.n
