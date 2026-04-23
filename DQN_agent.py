@@ -20,7 +20,7 @@ BATCH_SIZE = 64
 GAMMA = 0.99            # Discount Factor
 SEED = 42
 EPISODES = 600
-TARGET_UPDATE_C = 10            # hard-update target net every C episodes
+TARGET_UPDATE_C = 10    # hard-update target net every C episodes
 MAX_STEPS       = 1000
 
 
@@ -48,7 +48,6 @@ class ReplayBuffer:
         self.buffer = deque(maxlen=capacity)
     
     def add(self, state, action, reward, next_state, done):
-        # Add later
         """Stores transition in replay buffer.
 
         Args:
@@ -62,7 +61,6 @@ class ReplayBuffer:
         self.buffer.append(experience)
     
     def sample(self, batch_size):
-        # Add later
         """Randomly samples a batch from the buffer.
 
         Args:
@@ -157,14 +155,14 @@ def train():
         total_reward = 0
  
         for _ in range(MAX_STEPS):
-            action          = agent.select_action(state)
+            action = agent.select_action(state)
             next_state, reward, terminated, truncated, _ = env.step(action)
-            done            = terminated or truncated
+            done = terminated or truncated
  
             agent.buffer.add(state, action, reward, next_state, float(done))
             agent.update()
  
-            state        = next_state
+            state = next_state
             total_reward += reward
             if done:
                 break
